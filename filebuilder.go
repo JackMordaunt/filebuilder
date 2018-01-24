@@ -100,3 +100,16 @@ func (d Directory) Create(fs afero.Fs, base string) error {
 	}
 	return nil
 }
+
+// Entries represents a list of entries.
+type Entries []Entry
+
+// Create all entries in the list.
+func (entries Entries) Create(fs afero.Fs, root string) error {
+	for _, e := range entries {
+		if err := e.Create(fs, root); err != nil {
+			return err
+		}
+	}
+	return nil
+}

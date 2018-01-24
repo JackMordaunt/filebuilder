@@ -102,6 +102,7 @@ func (d Directory) Create(fs afero.Fs, base string) error {
 }
 
 // Entries represents a list of entries.
+// This wrapper allows []Entry to satisfy the Entry interface.
 type Entries []Entry
 
 // Create all entries in the list.

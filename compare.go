@@ -43,3 +43,35 @@ func CompareDirectories(fs afero.Fs, left, right string) (difference *Diff, ok b
 	}
 	return nil, true, nil
 }
+
+// Compare two different filesystem objects.
+func Compare(left, right afero.Fs) (*Diff, bool, error) {
+	diffs := &Diff{}
+	walkLeft := func(path string, _ os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		diffs.appendLeft(path)
+		return nil
+	}
+	walkRight := func(path string, _ os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		diffs.appendRight(path)
+		return nil
+	}
+	var err error
+	err = afero.Walk(left, "/", walkLeft)
+	if err != nil {
+		return nil, false, err
+	}
+	err = afero.Walk(right, "/", walkRight)
+	if err != nil {
+		return nil, false, err
+	}
+	if diffs.IsEmpty() {
+		return diffs, true, nil
+	}
+	return diffs, false, nil
+}

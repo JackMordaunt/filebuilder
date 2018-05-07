@@ -29,6 +29,9 @@ func Build(fs afero.Fs, root string, entries ...Entry) (CleanFunc, error) {
 		return fs.RemoveAll(root)
 	}
 	for _, e := range entries {
+		if e == nil {
+			continue
+		}
 		if err := e.Create(fs, root); err != nil {
 			return cleanup, err
 		}

@@ -1,6 +1,7 @@
 package filebuilder
 
 import (
+	"archive/zip"
 	"bytes"
 	"fmt"
 	"io"
@@ -116,4 +117,31 @@ func (entries Entries) Create(fs afero.Fs, root string) error {
 		}
 	}
 	return nil
+}
+
+// Zip represents a zip archive containing the specified files.
+type Zip struct {
+	Path  string
+	Files []File
+}
+
+// Create zips all the Files into a zip archive and creates that archive at the
+// specified Path on the specified filesystem.
+func (archive Zip) Create(fs afero.Fs, root string) error {
+	buf := bytes.NewBuffer(nil)
+	zw := zip.NewWriter(buf)
+	for _, file := range archive.Files {
+		f, err := zw.Create(file.Path)
+		if err != nil {
+			return errors.Wrapf(err, "archiving file %s", file.Path)
+		}
+		if _, err := f.Write(file.Content); err != nil {
+			return errors.Wrapf(err, "archiving file %s", file.Path)
+		}
+	}
+	if err := zw.Close(); err != nil {
+		return errors.Wrap(err, "closing zip writer")
+	}
+	path := filepath.Join(root, archive.Path)
+	return afero.WriteFile(fs, path, buf.Bytes(), 0755)
 }

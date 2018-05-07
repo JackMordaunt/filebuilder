@@ -96,6 +96,24 @@ func TestBuild(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			desc: "zip file",
+			fs:   afero.NewMemMapFs(),
+			root: "",
+			entries: []Entry{
+				Zip{
+					Path: "bar.zip",
+					Files: []File{
+						File{Path: "baz.exe"},
+						File{Path: "foo/bar/baz.exe"},
+						File{Path: "foo/baz/baz.exe"},
+						File{Path: "foo/baz.exe"},
+					},
+				},
+			},
+			want:    []string{"/bar.zip"},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		cleanup, err := Build(tt.fs, tt.root, tt.entries...)
